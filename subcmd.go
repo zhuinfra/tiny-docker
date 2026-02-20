@@ -1,0 +1,52 @@
+// subcom.go 处理tiny-docker的所有子命令解析与分发
+// 包括init/run/ps/logs/exec/stop/rm/commit/network等命令的参数解析和执行入口。
+package main
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"tiny-docker/container"
+
+	"github.com/urfave/cli/v3"
+)
+
+var runCommand = &cli.Command{
+	Name:  "run",
+	Usage: "Create a container with namespaces and cgroups limit",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "it",
+			Usage: "enable tty",
+		},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		/*
+			1.参数校验
+			2.调用Run去启动容器
+		*/
+		args := cmd.Args()
+		if args.Len() < 1 {
+			return fmt.Errorf("missing command")
+		}
+		tty := cmd.Bool("it")
+		command := args.First()
+		Run(tty, command)
+		return nil
+	},
+}
+
+var initCommand = &cli.Command{
+	/*
+		1.执行容器初始化操作, 实则通过exec替换进程
+	*/
+	Name:  "init",
+	Usage: "Init container process running user program. Do not call it outside",
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("initCommand start")
+		args := cmd.Args()
+		command := args.First()
+		err := container.InitContainer(command)
+		return err
+	},
+}
