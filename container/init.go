@@ -8,6 +8,11 @@ import (
 func InitContainer(command string) error {
 	slog.Info("InitContainer", "command", command)
 
+	// 切断 mount 传播, mount --make-rprivate /
+	if err := syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, ""); err != nil {
+		return err
+	}
+
 	// MS_NOEXEC在本文件系统中不允许运行其他程序
 	// MS_NOSUID在本系统中运行程序的时候，不允许set-user-ID或set-group-ID
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
