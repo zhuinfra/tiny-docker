@@ -1,15 +1,20 @@
 package container
 
 import (
+	"log/slog"
 	"os"
 	"os/exec"
 	"syscall"
 )
 
-func NewParentProcess(tty bool, command string) *exec.Cmd {
-	args := []string{"init", command}
+func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+	readPipe, writePipe, err := NewPipe()
+	if err != nil {
+		slog.Error("New pipe error", "error", err)
+		return nil, nil
+	}
 	// /proc/self/exe指向当前程序, 相当于执行docker init command
-	cmd := exec.Command("/proc/self/exe", args...)
+	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWNS |
 			syscall.CLONE_NEWUTS |
@@ -22,5 +27,14 @@ func NewParentProcess(tty bool, command string) *exec.Cmd {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	return cmd
+	cmd.ExtraFiles = []*os.File{readPipe}
+	return cmd, writePipe
+}
+
+func NewPipe() (*os.File, *os.File, error) {
+	read, write, err := os.Pipe()
+	if err != nil {
+		return nil, nil, err
+	}
+	return read, write, nil
 }
