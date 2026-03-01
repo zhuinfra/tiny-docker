@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"strings"
 	"tiny-docker/cgroups/subsystems"
 	"tiny-docker/container"
 
@@ -42,14 +41,13 @@ var runCommand = &cli.Command{
 			return fmt.Errorf("missing command")
 		}
 		comArray := args.Slice()
-		command := strings.Join(comArray, " ")
 		tty := cmd.Bool("it")
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: cmd.String("m"),
 			CpuSet:      cmd.String("cpus"),
 			CpuShare:    cmd.String("c"),
 		}
-		Run(tty, command, resConf) // 传递剩余参数
+		Run(tty, comArray, resConf) // 传递剩余参数
 		return nil
 	},
 }
@@ -62,9 +60,7 @@ var initCommand = &cli.Command{
 	Usage: "Init container process running user program. Do not call it outside",
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		slog.Info("initCommand start")
-		args := cmd.Args()
-		command := args.First()
-		err := container.InitContainer(command)
+		err := container.InitContainer()
 		return err
 	},
 }
