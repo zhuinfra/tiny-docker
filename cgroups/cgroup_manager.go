@@ -1,6 +1,8 @@
 package cgroups
 
-import "tiny-docker/cgroups/subsystems"
+import (
+	"tiny-docker/cgroups/subsystems"
+)
 
 type CgroupManager struct {
 	Path     string
