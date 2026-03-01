@@ -2,6 +2,7 @@ package container
 
 import (
 	"log/slog"
+	"strings"
 	"syscall"
 )
 
@@ -18,7 +19,9 @@ func InitContainer(command string) error {
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	// 挂载proc文件系统, ps命令依赖proc文件系统
 	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
-	argv := []string{command}
+	argv := strings.Split(command, " ")
+	command = argv[0]
+	slog.Info("InitContainer", "command", command)
 	if err := syscall.Exec(command, argv, []string{}); err != nil {
 		slog.Error("Exec", "err", err)
 	}

@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
+	"tiny-docker/cgroups/subsystems"
 	"tiny-docker/container"
 
 	"github.com/urfave/cli/v3"
@@ -13,25 +15,29 @@ import (
 
 var runCommand = &cli.Command{
 	Name:  "run",
-	Usage: "Create a container with namespaces and cgroups limit",
+	Usage: "Create a container with namespaces and cgroups limit\nUsage: tiny-docker run [OPTIONS] -- COMMAND [ARGS...]",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "it",
 			Usage: "enable tty",
 		},
+		&cli.StringFlag{
+			Name:  "m",
+			Usage: "memory limit",
+		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		/*
-			1.参数校验
-			2.调用Run去启动容器
-		*/
 		args := cmd.Args()
 		if args.Len() < 1 {
 			return fmt.Errorf("missing command")
 		}
+		comArray := args.Slice()
+		command := strings.Join(comArray, " ")
 		tty := cmd.Bool("it")
-		command := args.First()
-		Run(tty, command)
+		resConf := &subsystems.ResourceConfig{
+			MemoryLimit: cmd.String("m"),
+		}
+		Run(tty, command, resConf) // 传递剩余参数
 		return nil
 	},
 }
