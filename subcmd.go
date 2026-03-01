@@ -22,8 +22,18 @@ var runCommand = &cli.Command{
 			Usage: "enable tty",
 		},
 		&cli.StringFlag{
-			Name:  "m",
-			Usage: "memory limit",
+			Name:    "m",
+			Aliases: []string{"memory"},
+			Usage:   "memory limit",
+		},
+		&cli.IntFlag{
+			Name:    "c",
+			Aliases: []string{"cpu-shares"},
+			Usage:   "CPU shares (relative weight)",
+		},
+		&cli.FloatFlag{
+			Name:  "cpus",
+			Usage: "Number of CPUs",
 		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -36,6 +46,8 @@ var runCommand = &cli.Command{
 		tty := cmd.Bool("it")
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: cmd.String("m"),
+			CpuSet:      cmd.String("cpus"),
+			CpuShare:    cmd.String("c"),
 		}
 		Run(tty, command, resConf) // 传递剩余参数
 		return nil
