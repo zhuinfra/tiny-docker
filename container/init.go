@@ -12,7 +12,6 @@ import (
 )
 
 func InitContainer() error {
-	slog.Info("InitContainer")
 	cmdArray := readUserCommand()
 	if len(cmdArray) == 0 {
 		return fmt.Errorf("readUserCommand error, cmdArray is nil")
@@ -72,7 +71,7 @@ func setupMount() {
 		slog.Error("Get current location error", "err", err)
 		return
 	}
-	slog.Info("setupMount", "pwd", pwd)
+	slog.Info("pivotRoot", "pwd", pwd)
 	pivotRoot(pwd)
 
 	// MS_NOEXEC在本文件系统中不允许运行其他程序

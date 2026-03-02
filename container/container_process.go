@@ -27,7 +27,12 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
+
 	cmd.ExtraFiles = []*os.File{readPipe}
+
+	NewWorkSpace("containerID", "busybox")
+	cmd.Dir = GetMerged("containerID")
+
 	return cmd, writePipe
 }
 

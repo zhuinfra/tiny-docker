@@ -1,0 +1,41 @@
+package container
+
+import "fmt"
+
+const (
+	ImagePath       = "/var/lib/tiny-docker/image/"
+	RootPath        = "/var/lib/tiny-docker/overlay2/"
+	lowerDirFormat  = ImagePath + "%s"
+	upperDirFormat  = RootPath + "%s/upper"
+	workDirFormat   = RootPath + "%s/work"
+	mergedDirFormat = RootPath + "%s/merged"
+	overlayFSFormat = "lowerdir=%s,upperdir=%s,workdir=%s"
+)
+
+func GetRoot(containerID string) string {
+	return RootPath + containerID
+}
+
+func GetImage(imageName string) string {
+	return fmt.Sprintf("%s%s.tar", ImagePath, imageName)
+}
+
+func GetLower(imageName string) string {
+	return fmt.Sprintf(lowerDirFormat, imageName)
+}
+
+func GetUpper(containerID string) string {
+	return fmt.Sprintf(upperDirFormat, containerID)
+}
+
+func GetWorker(containerID string) string {
+	return fmt.Sprintf(workDirFormat, containerID)
+}
+
+func GetMerged(containerID string) string {
+	return fmt.Sprintf(mergedDirFormat, containerID)
+}
+
+func GetOverlayFSDirs(lower, upper, worker string) string {
+	return fmt.Sprintf(overlayFSFormat, lower, upper, worker)
+}

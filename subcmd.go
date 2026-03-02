@@ -36,6 +36,7 @@ var runCommand = &cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("runCommand start")
 		args := cmd.Args()
 		if args.Len() < 1 {
 			return fmt.Errorf("missing command")

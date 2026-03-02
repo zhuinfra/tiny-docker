@@ -9,6 +9,7 @@ import (
 	"tiny-docker/container"
 )
 
+// 创建容器, 设置namespace和cgroup
 func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
 	parent, writePipe := container.NewParentProcess(tty)
 	if parent == nil {
@@ -18,21 +19,23 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
 	if err := parent.Start(); err != nil {
 		slog.Error("container startup failed", "error", err)
 	}
+	slog.Info("container created", "pid", parent.Process.Pid)
+
+	// 设置cgroup
 	cgroupsManager := cgroups.NewCgroupManager("tiny-docker-cgroup")
 	defer cgroupsManager.Destory()
-	slog.Info("cgroup", "pid", parent.Process.Pid)
 	cgroupsManager.Set(res)
 	cgroupsManager.Apply(parent.Process.Pid)
 
+	// 通过管道向init进程发送容器命令
 	sendInitCommand(comArray, writePipe)
 
 	parent.Wait()
-	os.Exit(1)
+	container.DeleteWorkSpace("containerID")
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {
 	command := strings.Join(comArray, " ")
-	slog.Info("command", "command", command)
 	writePipe.WriteString(command)
 	writePipe.Close()
 }
