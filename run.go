@@ -10,8 +10,8 @@ import (
 )
 
 // 创建容器, 设置namespace和cgroup
-func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
-	parent, writePipe := container.NewParentProcess(tty)
+func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string) {
+	parent, writePipe := container.NewParentProcess(tty, volume)
 	if parent == nil {
 		slog.Error("parent process create failed")
 		return
@@ -31,7 +31,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
 	sendInitCommand(comArray, writePipe)
 
 	parent.Wait()
-	container.DeleteWorkSpace("containerID")
+	container.DeleteWorkSpace("containerID", volume)
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {

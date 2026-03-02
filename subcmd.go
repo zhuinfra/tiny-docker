@@ -34,6 +34,10 @@ var runCommand = &cli.Command{
 			Name:  "cpus",
 			Usage: "Number of CPUs",
 		},
+		&cli.StringFlag{
+			Name:  "v",
+			Usage: "Bind a directory on the host to the container",
+		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		slog.Info("runCommand start")
@@ -48,7 +52,8 @@ var runCommand = &cli.Command{
 			CpuSet:      cmd.String("cpus"),
 			CpuShare:    cmd.String("c"),
 		}
-		Run(tty, comArray, resConf) // 传递剩余参数
+		volume := cmd.String("v")
+		Run(tty, comArray, resConf, volume) // 传递剩余参数
 		return nil
 	},
 }

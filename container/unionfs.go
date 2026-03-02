@@ -6,13 +6,31 @@ import (
 	"os/exec"
 )
 
-func NewWorkSpace(containerID string, imageName string) {
+func NewWorkSpace(containerID string, imageName string, volume string) {
 	creatLower(imageName)
 	createDirs(containerID)
 	mountOverlayFS(containerID, imageName)
+	if volume != "" {
+		mntPath := GetMerged("containerID")
+		hostPath, containerPath, err := volumeExtract(volume)
+		if err != nil {
+			slog.Error("volumeExtract error", "error", err)
+			os.Exit(1)
+		}
+		mountVolume(mntPath, hostPath, containerPath)
+	}
 }
 
-func DeleteWorkSpace(containerID string) {
+func DeleteWorkSpace(containerID string, volume string) {
+	if volume != "" {
+		_, containerPath, err := volumeExtract(volume)
+		if err != nil {
+			slog.Error("volumeExtract error", "error", err)
+			return
+		}
+		mntPath := GetMerged(containerID)
+		umountVolume(mntPath, containerPath)
+	}
 	umountOverlayFS(containerID)
 	deleteDirs(containerID)
 }

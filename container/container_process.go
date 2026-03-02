@@ -7,7 +7,7 @@ import (
 	"syscall"
 )
 
-func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		slog.Error("New pipe error", "error", err)
@@ -30,7 +30,7 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 
 	cmd.ExtraFiles = []*os.File{readPipe}
 
-	NewWorkSpace("containerID", "busybox")
+	NewWorkSpace("containerID", "busybox", volume)
 	cmd.Dir = GetMerged("containerID")
 
 	return cmd, writePipe

@@ -45,12 +45,7 @@ func containerEnv() []string {
 		"TERM=xterm",
 	}
 
-	// 可选：继承宿主 TERM
-	for _, e := range os.Environ() {
-		if strings.HasPrefix(e, "TERM=") {
-			env = append(env, e)
-		}
-	}
+	os.Setenv("PATH", env[0])
 
 	return env
 }
