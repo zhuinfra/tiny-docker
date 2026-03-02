@@ -70,3 +70,22 @@ var initCommand = &cli.Command{
 		return err
 	},
 }
+
+var exportCommand = &cli.Command{
+	/*
+		1.导出容器的rootfs
+	*/
+	Name:  "export",
+	Usage: "export a container",
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("exportCommand start")
+		args := cmd.Args()
+		if args.Len() < 2 {
+			return fmt.Errorf("missing container name and image name")
+		}
+		if err := ExportContainer(args.Get(0), args.Get(1)); err != nil {
+			return err
+		}
+		return nil
+	},
+}

@@ -24,6 +24,7 @@ Features:
 		Commands: []*cli.Command{
 			runCommand,
 			initCommand,
+			exportCommand,
 		},
 	}
 
