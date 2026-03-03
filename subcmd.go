@@ -20,6 +20,10 @@ var runCommand = &cli.Command{
 			Name:  "it",
 			Usage: "enable tty",
 		},
+		&cli.BoolFlag{
+			Name:  "d",
+			Usage: "detach container",
+		},
 		&cli.StringFlag{
 			Name:    "m",
 			Aliases: []string{"memory"},
@@ -46,7 +50,13 @@ var runCommand = &cli.Command{
 			return fmt.Errorf("missing command")
 		}
 		comArray := args.Slice()
+
 		tty := cmd.Bool("it")
+		detach := cmd.Bool("d")
+		if tty && detach {
+			return fmt.Errorf("it is invalid to use -it and -d together")
+		}
+
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: cmd.String("m"),
 			CpuSet:      cmd.String("cpus"),

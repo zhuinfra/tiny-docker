@@ -30,8 +30,11 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume str
 	// 通过管道向init进程发送容器命令
 	sendInitCommand(comArray, writePipe)
 
-	parent.Wait()
-	container.DeleteWorkSpace("containerID", volume)
+	if tty {
+		parent.Wait()
+		// container.DeleteWorkSpace("containerID", volume)
+	}
+
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {
