@@ -42,6 +42,10 @@ var runCommand = &cli.Command{
 			Name:  "v",
 			Usage: "Bind a directory on the host to the container",
 		},
+		&cli.StringFlag{
+			Name:  "name",
+			Usage: "Assign a name to the container",
+		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		slog.Info("runCommand start")
@@ -63,7 +67,8 @@ var runCommand = &cli.Command{
 			CpuShare:    cmd.String("c"),
 		}
 		volume := cmd.String("v")
-		Run(tty, comArray, resConf, volume) // 传递剩余参数
+		containerName := cmd.String("name")
+		Run(tty, comArray, resConf, volume, containerName) // 传递剩余参数
 		return nil
 	},
 }
@@ -96,6 +101,16 @@ var exportCommand = &cli.Command{
 		if err := ExportContainer(args.Get(0), args.Get(1)); err != nil {
 			return err
 		}
+		return nil
+	},
+}
+
+var psCommand = &cli.Command{
+	Name:  "ps",
+	Usage: "list all the containers",
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("psCommand start")
+		ListContainers()
 		return nil
 	},
 }
