@@ -18,6 +18,7 @@ var (
 	Exit                = "exited"
 	DefaultInfoLocation = "/var/run/tiny-docker/%s/"
 	ConfigName          = "config.json"
+	ContainerLogFile    = "container.log"
 )
 
 type ContainerInfo struct {
@@ -39,18 +40,17 @@ func randStringBytes(n int) string {
 	return string(b)
 }
 
-func generateId() string {
+func GenerateId() string {
 	return randStringBytes(10)
 }
 
 // 记录容器信息
-func RecordContainerInfo(containerPID int, commandArray []string, containerName string) (string, error) {
+func RecordContainerInfo(containerID string, containerPID int, commandArray []string, containerName string) (string, error) {
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	command := strings.Join(commandArray, " ")
-	id := generateId()
 	containInfo := ContainerInfo{
 		Pid:         strconv.Itoa(containerPID),
-		Id:          id,
+		Id:          containerID,
 		Name:        containerName,
 		Command:     command,
 		CreatedTime: createTime,
@@ -65,7 +65,7 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName 
 	}
 	jsonStr := string(jsonBytes)
 
-	dirUrl := fmt.Sprintf(DefaultInfoLocation, id)
+	dirUrl := fmt.Sprintf(DefaultInfoLocation, containerID)
 	if err := os.MkdirAll(dirUrl, 0777); err != nil {
 		slog.Error("Mkdir error.")
 		return "", err

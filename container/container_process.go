@@ -1,13 +1,14 @@
 package container
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"syscall"
 )
 
-func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerID string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		slog.Error("New pipe error", "error", err)
@@ -26,6 +27,19 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else {
+		dirURL := fmt.Sprintf(DefaultInfoLocation, containerID)
+		if err := os.MkdirAll(dirURL, 0622); err != nil {
+			slog.Error("NewParentProcess mkdir error", "err", err)
+			return nil, nil
+		}
+		stdLogFilePath := dirURL + ContainerLogFile
+		stdLogFile, err := os.Create(stdLogFilePath)
+		if err != nil {
+			slog.Error("NewParentProcess create file error", "err", err)
+			return nil, nil
+		}
+		cmd.Stdout = stdLogFile
 	}
 
 	cmd.ExtraFiles = []*os.File{readPipe}

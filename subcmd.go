@@ -114,3 +114,17 @@ var psCommand = &cli.Command{
 		return nil
 	},
 }
+
+var logsCommand = &cli.Command{
+	Name:  "logs",
+	Usage: "print logs of a container",
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("logCommand start")
+		args := cmd.Args()
+		if args.Len() < 1 {
+			return fmt.Errorf("missing container id")
+		}
+		logContainer(args.Get(0))
+		return nil
+	},
+}

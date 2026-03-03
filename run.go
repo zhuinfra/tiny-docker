@@ -11,7 +11,8 @@ import (
 
 // 创建容器, 设置namespace和cgroup
 func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string, containerName string) {
-	parent, writePipe := container.NewParentProcess(tty, volume)
+	containerID := container.GenerateId()
+	parent, writePipe := container.NewParentProcess(tty, volume, containerID)
 	if parent == nil {
 		slog.Error("parent process create failed")
 		return
@@ -21,7 +22,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume str
 	}
 	slog.Info("container created", "pid", parent.Process.Pid)
 
-	container.RecordContainerInfo(parent.Process.Pid, comArray, containerName)
+	container.RecordContainerInfo(containerID, parent.Process.Pid, comArray, containerName)
 
 	// 设置cgroup
 	cgroupsManager := cgroups.NewCgroupManager("tiny-docker-cgroup")
