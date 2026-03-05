@@ -27,6 +27,7 @@ Features:
 			exportCommand,
 			psCommand,
 			logsCommand,
+			execCommand,
 		},
 	}
 

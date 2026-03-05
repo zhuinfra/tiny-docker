@@ -128,3 +128,19 @@ var logsCommand = &cli.Command{
 		return nil
 	},
 }
+
+var execCommand = &cli.Command{
+	Name:  "exec",
+	Usage: "exec a command into a container",
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("execCommand start")
+		args := cmd.Args()
+		if args.Len() < 2 {
+			return fmt.Errorf("missing container id or command")
+		}
+		containerID := args.Get(0)
+		cmdArray := args.Slice()[1:]
+		ExecContainer(containerID, cmdArray)
+		return nil
+	},
+}
