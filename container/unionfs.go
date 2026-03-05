@@ -11,7 +11,7 @@ func NewWorkSpace(containerID string, imageName string, volume string) {
 	createDirs(containerID)
 	mountOverlayFS(containerID, imageName)
 	if volume != "" {
-		mntPath := GetMerged("containerID")
+		mntPath := GetMerged(containerID)
 		hostPath, containerPath, err := volumeExtract(volume)
 		if err != nil {
 			slog.Error("volumeExtract error", "error", err)
