@@ -7,17 +7,37 @@ import (
 )
 
 func NewWorkSpace(containerID string, imageName string, volume string) {
-	creatLower(imageName)
-	createDirs(containerID)
-	mountOverlayFS(containerID, imageName)
+	// 1. 执行creatLower，失败则退出
+	if err := creatLower(imageName); err != nil {
+		slog.Error("failed to create lower layer", "error", err, "image", imageName)
+		os.Exit(1)
+	}
+
+	// 2. 执行createDirs，失败则退出
+	if err := createDirs(containerID); err != nil {
+		slog.Error("failed to create container dirs", "error", err, "containerID", containerID)
+		os.Exit(1)
+	}
+
+	// 3. 执行mountOverlayFS，失败则退出
+	if err := mountOverlayFS(containerID, imageName); err != nil {
+		slog.Error("failed to mount overlayFS", "error", err, "containerID", containerID, "image", imageName)
+		os.Exit(1)
+	}
+
+	// 4. 处理volume挂载
 	if volume != "" {
 		mntPath := GetMerged(containerID)
 		hostPath, containerPath, err := volumeExtract(volume)
 		if err != nil {
-			slog.Error("volumeExtract error", "error", err)
+			slog.Error("volumeExtract error", "error", err, "volume", volume)
 			os.Exit(1)
 		}
-		mountVolume(mntPath, hostPath, containerPath)
+
+		if err := mountVolume(mntPath, hostPath, containerPath); err != nil {
+			slog.Error("failed to mount volume", "error", err, "mntPath", mntPath)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -59,7 +79,7 @@ func creatLower(imageName string) error {
 }
 
 // 创建可写层用于overlayfs 挂载
-func createDirs(containerID string) {
+func createDirs(containerID string) error {
 	dirs := []string{
 		GetWorker(containerID),
 		GetUpper(containerID),
@@ -68,8 +88,10 @@ func createDirs(containerID string) {
 	for _, dir := range dirs {
 		if err := os.MkdirAll(dir, 0622); err != nil {
 			slog.Error("Mkdir dir error.", "err", err)
+			return err
 		}
 	}
+	return nil
 }
 
 // 创建overlayfs挂载点

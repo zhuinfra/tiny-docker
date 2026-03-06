@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func mountVolume(mntPath, hostPath, containerPath string) {
+func mountVolume(mntPath, hostPath, containerPath string) error {
 	if err := os.Mkdir(hostPath, 0777); err != nil {
 		slog.Info("os.Mkdir error", "error", err)
 	}
@@ -22,7 +22,9 @@ func mountVolume(mntPath, hostPath, containerPath string) {
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		slog.Error("mount error", "error", err)
+		return err
 	}
+	return nil
 }
 
 func umountVolume(mntPath, containerPath string) {

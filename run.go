@@ -10,10 +10,10 @@ import (
 )
 
 // 创建容器, 设置namespace和cgroup
-func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume string, containerName string) {
+func Run(tty bool, image string, comArray []string, res *subsystems.ResourceConfig, volume string, containerName string) {
 	containerID := container.GenerateId()
-	parent, writePipe := container.NewParentProcess(tty, volume, containerID)
-	if parent == nil {
+	parent, writePipe, err := container.NewParentProcess(tty, volume, containerID, image)
+	if parent == nil || err != nil {
 		slog.Error("parent process create failed")
 		return
 	}

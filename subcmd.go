@@ -50,10 +50,11 @@ var runCommand = &cli.Command{
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		slog.Info("runCommand start")
 		args := cmd.Args()
-		if args.Len() < 1 {
-			return fmt.Errorf("missing command")
+		if args.Len() < 2 {
+			return fmt.Errorf("missing image or command")
 		}
-		comArray := args.Slice()
+		image := args.Get(0)
+		comArray := args.Slice()[1:]
 
 		tty := cmd.Bool("it")
 		detach := cmd.Bool("d")
@@ -68,7 +69,7 @@ var runCommand = &cli.Command{
 		}
 		volume := cmd.String("v")
 		containerName := cmd.String("name")
-		Run(tty, comArray, resConf, volume, containerName) // 传递剩余参数
+		Run(tty, image, comArray, resConf, volume, containerName)
 		return nil
 	},
 }
@@ -96,7 +97,7 @@ var exportCommand = &cli.Command{
 		slog.Info("exportCommand start")
 		args := cmd.Args()
 		if args.Len() < 2 {
-			return fmt.Errorf("missing container name and image name")
+			return fmt.Errorf("missing container id and image name")
 		}
 		if err := ExportContainer(args.Get(0), args.Get(1)); err != nil {
 			return err

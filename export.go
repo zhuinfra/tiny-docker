@@ -9,8 +9,8 @@ import (
 )
 
 // 镜像打包
-func ExportContainer(containerName string, imageName string) error {
-	mntPath := container.GetMerged(containerName)
+func ExportContainer(containerId string, imageName string) error {
+	mntPath := container.GetMerged(containerId)
 	if _, err := os.Stat(mntPath); os.IsNotExist(err) {
 		slog.Error("mntPath not exists")
 		return nil

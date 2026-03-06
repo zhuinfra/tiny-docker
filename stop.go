@@ -40,7 +40,7 @@ func stopContainer(containerId string) {
 	// 4.重新写回存储容器信息的文件
 	dirPath := fmt.Sprintf(container.DefaultInfoLocation, containerId)
 	configFilePath := path.Join(dirPath, container.ConfigName)
-	if err = os.WriteFile(configFilePath, newContentBytes, 622); err != nil {
+	if err = os.WriteFile(configFilePath, newContentBytes, 0622); err != nil {
 		slog.Error("Write file error", "configFilePath", configFilePath, "err", err)
 	}
 	slog.Info("Stop container success", "containerId", containerId)

@@ -8,11 +8,11 @@ import (
 	"syscall"
 )
 
-func NewParentProcess(tty bool, volume string, containerID string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerID string, image string) (*exec.Cmd, *os.File, error) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		slog.Error("New pipe error", "error", err)
-		return nil, nil
+		return nil, nil, err
 	}
 	// /proc/self/exe指向当前程序, 相当于执行docker init command
 	cmd := exec.Command("/proc/self/exe", "init")
@@ -31,23 +31,23 @@ func NewParentProcess(tty bool, volume string, containerID string) (*exec.Cmd, *
 		dirURL := fmt.Sprintf(DefaultInfoLocation, containerID)
 		if err := os.MkdirAll(dirURL, 0622); err != nil {
 			slog.Error("NewParentProcess mkdir error", "err", err)
-			return nil, nil
+			return nil, nil, err
 		}
 		stdLogFilePath := dirURL + ContainerLogFile
 		stdLogFile, err := os.Create(stdLogFilePath)
 		if err != nil {
 			slog.Error("NewParentProcess create file error", "err", err)
-			return nil, nil
+			return nil, nil, err
 		}
 		cmd.Stdout = stdLogFile
 	}
 
 	cmd.ExtraFiles = []*os.File{readPipe}
 
-	NewWorkSpace(containerID, "busybox", volume)
+	NewWorkSpace(containerID, image, volume)
 	cmd.Dir = GetMerged(containerID)
 
-	return cmd, writePipe
+	return cmd, writePipe, nil
 }
 
 func NewPipe() (*os.File, *os.File, error) {
