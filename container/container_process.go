@@ -8,7 +8,7 @@ import (
 	"syscall"
 )
 
-func NewParentProcess(tty bool, volume string, containerID string, image string) (*exec.Cmd, *os.File, error) {
+func NewParentProcess(tty bool, volume string, containerID string, image string, envSlice []string) (*exec.Cmd, *os.File, error) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		slog.Error("New pipe error", "error", err)
@@ -42,6 +42,8 @@ func NewParentProcess(tty bool, volume string, containerID string, image string)
 		cmd.Stdout = stdLogFile
 	}
 
+	cmd.Env = containerEnv(envSlice)
+
 	cmd.ExtraFiles = []*os.File{readPipe}
 
 	NewWorkSpace(containerID, image, volume)
@@ -56,4 +58,18 @@ func NewPipe() (*os.File, *os.File, error) {
 		return nil, nil, err
 	}
 	return read, write, nil
+}
+
+func containerEnv(envSlice []string) []string {
+
+	env := []string{
+		"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+		"HOME=/root",
+		"TERM=xterm",
+	}
+
+	os.Setenv("PATH", env[0])
+	env = append(env, envSlice...)
+
+	return env
 }

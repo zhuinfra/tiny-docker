@@ -46,6 +46,10 @@ var runCommand = &cli.Command{
 			Name:  "name",
 			Usage: "Assign a name to the container",
 		},
+		&cli.StringSliceFlag{
+			Name:  "e",
+			Usage: "set environment variables",
+		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		slog.Info("runCommand start")
@@ -69,7 +73,8 @@ var runCommand = &cli.Command{
 		}
 		volume := cmd.String("v")
 		containerName := cmd.String("name")
-		Run(tty, image, comArray, resConf, volume, containerName)
+		envSlice := cmd.StringSlice("e")
+		Run(tty, image, comArray, resConf, volume, containerName, envSlice)
 		return nil
 	},
 }

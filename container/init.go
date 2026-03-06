@@ -24,30 +24,17 @@ func InitContainer() error {
 
 	setupMount()
 
-	env := containerEnv()
+	//env := containerEnv()
 
 	path, err := exec.LookPath(cmdArray[0])
 	if err != nil {
 		slog.Error("LookPath", "err", err)
 		return err
 	}
-	if err := syscall.Exec(path, cmdArray, env); err != nil {
+	if err := syscall.Exec(path, cmdArray, os.Environ()); err != nil {
 		slog.Error("Exec", "err", err)
 	}
 	return nil
-}
-
-func containerEnv() []string {
-
-	env := []string{
-		"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-		"HOME=/root",
-		"TERM=xterm",
-	}
-
-	os.Setenv("PATH", env[0])
-
-	return env
 }
 func readUserCommand() []string {
 	pipe := os.NewFile(uintptr(3), "pipe")
