@@ -144,3 +144,38 @@ var execCommand = &cli.Command{
 		return nil
 	},
 }
+
+var stopCommand = &cli.Command{
+	Name:  "stop",
+	Usage: "stop a container",
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("stopCommand start")
+		args := cmd.Args()
+		if args.Len() < 1 {
+			return fmt.Errorf("missing container id")
+		}
+		stopContainer(args.Get(0))
+		return nil
+	},
+}
+
+var rmCommand = &cli.Command{
+	Name:  "rm",
+	Usage: "remove unused containers",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "f",
+			Usage: "force remove container",
+		},
+	},
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		slog.Info("rmCommand start")
+		args := cmd.Args()
+		if args.Len() < 1 {
+			return fmt.Errorf("missing container id")
+		}
+		isForce := cmd.Bool("f")
+		removeContainer(args.Get(0), isForce)
+		return nil
+	},
+}

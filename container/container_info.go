@@ -28,6 +28,7 @@ type ContainerInfo struct {
 	Command     string `json:"command"`    // 容器内init运行命令
 	CreatedTime string `json:"createTime"` // 创建时间
 	Status      string `json:"status"`     // 容器的状态
+	Volume      string `json:"volume"`
 }
 
 func randStringBytes(n int) string {
@@ -45,7 +46,7 @@ func GenerateId() string {
 }
 
 // 记录容器信息
-func RecordContainerInfo(containerID string, containerPID int, commandArray []string, containerName string) (string, error) {
+func RecordContainerInfo(containerID string, containerPID int, commandArray []string, containerName string, volume string) (string, error) {
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	command := strings.Join(commandArray, " ")
 	containInfo := ContainerInfo{
@@ -55,6 +56,7 @@ func RecordContainerInfo(containerID string, containerPID int, commandArray []st
 		Command:     command,
 		CreatedTime: createTime,
 		Status:      RUNNING,
+		Volume:      volume,
 	}
 
 	// 容器信息保存成json

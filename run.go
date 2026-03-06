@@ -22,7 +22,7 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig, volume str
 	}
 	slog.Info("container created", "pid", parent.Process.Pid)
 
-	container.RecordContainerInfo(containerID, parent.Process.Pid, comArray, containerName)
+	container.RecordContainerInfo(containerID, parent.Process.Pid, comArray, containerName, volume)
 
 	// 设置cgroup
 	cgroupsManager := cgroups.NewCgroupManager("tiny-docker-cgroup")

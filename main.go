@@ -28,6 +28,8 @@ Features:
 			psCommand,
 			logsCommand,
 			execCommand,
+			stopCommand,
+			rmCommand,
 		},
 	}
 
