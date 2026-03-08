@@ -30,6 +30,7 @@ Features:
 			execCommand,
 			stopCommand,
 			rmCommand,
+			//networkCommand,
 		},
 	}
 

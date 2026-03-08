@@ -34,10 +34,10 @@ func (ipam *IPAM) load() error {
 		}
 	}
 	subnetConfigFile, err := os.Open(ipam.SubnetAllocatorPath)
-	defer subnetConfigFile.Close()
 	if err != nil {
 		return err
 	}
+	defer subnetConfigFile.Close()
 	subnetJson := make([]byte, 2048)
 	n, err := subnetConfigFile.Read(subnetJson)
 	if err != nil {
@@ -62,10 +62,10 @@ func (ipam *IPAM) dump() error {
 	}
 
 	subnetConfigFile, err := os.OpenFile(ipam.SubnetAllocatorPath, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0644)
-	defer subnetConfigFile.Close()
 	if err != nil {
 		return err
 	}
+	defer subnetConfigFile.Close()
 	ipamConfigJson, err := json.Marshal(ipam.Subnets)
 	if err != nil {
 		return err
