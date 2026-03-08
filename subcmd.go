@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"tiny-docker/cgroups/subsystems"
 	"tiny-docker/container"
+	"tiny-docker/network"
 
 	"github.com/urfave/cli/v3"
 )
@@ -186,64 +187,65 @@ var rmCommand = &cli.Command{
 	},
 }
 
-// var networkCommand = &cli.Command{
-// 	Name:  "network",
-// 	Usage: "container network commands",
-// 	Commands: []*cli.Command{ // 修改这里：Subcommands -> Commands
-// 		{
-// 			Name:  "list",
-// 			Usage: "list all container networks",
-// 			Action: func(ctx context.Context, cmd *cli.Command) error {
-// 				slog.Info("network list start")
-// 				ListNetworks()
-// 				return nil
-// 			},
-// 		},
-// 		{
-// 			Name:  "delete",
-// 			Usage: "delete a container network",
-// 			Flags: []cli.Flag{
-// 				&cli.BoolFlag{
-// 					Name:  "f",
-// 					Usage: "force delete network",
-// 				},
-// 			},
-// 			Action: func(ctx context.Context, cmd *cli.Command) error {
-// 				slog.Info("network delete start")
-// 				args := cmd.Args()
-// 				if args.Len() < 1 {
-// 					return fmt.Errorf("missing network name")
-// 				}
-// 				isForce := cmd.Bool("f")
-// 				DeleteNetwork(args.Get(0), isForce)
-// 				return nil
-// 			},
-// 		},
-// 		{
-// 			Name:  "create",
-// 			Usage: "create a container network",
-// 			Flags: []cli.Flag{
-// 				&cli.StringFlag{
-// 					Name:  "driver",
-// 					Usage: "network driver (bridge/overlay)",
-// 					Value: "bridge",
-// 				},
-// 				&cli.StringFlag{
-// 					Name:  "subnet",
-// 					Usage: "network subnet (e.g., 172.18.0.0/16)",
-// 				},
-// 			},
-// 			Action: func(ctx context.Context, cmd *cli.Command) error {
-// 				slog.Info("network create start")
-// 				args := cmd.Args()
-// 				if args.Len() < 1 {
-// 					return fmt.Errorf("missing network name")
-// 				}
-// 				driver := cmd.String("driver")
-// 				subnet := cmd.String("subnet")
-// 				CreateNetwork(args.Get(0), driver, subnet)
-// 				return nil
-// 			},
-// 		},
-// 	},
-// }
+var networkCommand = &cli.Command{
+	Name:  "network",
+	Usage: "container network commands",
+	Commands: []*cli.Command{
+		{
+			Name:  "create",
+			Usage: "create a container network",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "driver",
+					Usage: "network driver (bridge/overlay)",
+					Value: "bridge",
+				},
+				&cli.StringFlag{
+					Name:  "subnet",
+					Usage: "network subnet (e.g., 172.18.0.0/16)",
+				},
+			},
+			Action: func(ctx context.Context, cmd *cli.Command) error {
+				slog.Info("network create start")
+				args := cmd.Args()
+				if args.Len() < 1 {
+					return fmt.Errorf("missing network name")
+				}
+				network.Init()
+				driver := cmd.String("driver")
+				subnet := cmd.String("subnet")
+				network.CreateNetwork(driver, subnet, args.Get(0))
+				return nil
+			},
+		},
+		{
+			Name:  "ls",
+			Usage: "list all container networks",
+			Action: func(ctx context.Context, cmd *cli.Command) error {
+				slog.Info("network list start")
+				network.ListNetwork()
+				return nil
+			},
+		},
+		{
+			Name:  "rm",
+			Usage: "delete a container network",
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:  "f",
+					Usage: "force delete network",
+				},
+			},
+			Action: func(ctx context.Context, cmd *cli.Command) error {
+				slog.Info("network delete start")
+				args := cmd.Args()
+				if args.Len() < 1 {
+					return fmt.Errorf("missing network name")
+				}
+				network.Init()
+				network.DeleteNetwork(args.Get(0))
+				return nil
+			},
+		},
+	},
+}

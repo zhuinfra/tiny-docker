@@ -122,6 +122,9 @@ func (ipam *IPAM) Allocate(subnet *net.IPNet) (ip net.IP, err error) {
 // 释放指定网段下的指定ip
 func (ipam *IPAM) Release(subnet *net.IPNet, ipaddr *net.IP) error {
 	ipam.Subnets = &map[string]string{}
+
+	_, subnet, _ = net.ParseCIDR(subnet.String())
+
 	err := ipam.load()
 	if err != nil {
 		return err

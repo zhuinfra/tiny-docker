@@ -12,8 +12,8 @@ func TestAllocate(t *testing.T) {
 }
 
 func TestRelease(t *testing.T) {
-	_, ipnet, _ := net.ParseCIDR("192.168.1.0/24")
-	ip := net.ParseIP("192.168.1.1")
+	_, ipnet, _ := net.ParseCIDR("192.168.2.1/24")
+	ip := net.ParseIP("192.168.2.1")
 	err := ipAllocator.Release(ipnet, &ip)
 	if err != nil {
 		t.Fatal(err)

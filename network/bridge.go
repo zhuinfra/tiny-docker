@@ -18,6 +18,48 @@ func (d *BridgeNetworkDriver) Name() string {
 	return "bridge"
 }
 
+func (d *BridgeNetworkDriver) Create(subnet string, name string) (*Network, error) {
+	ip, ipRange, _ := net.ParseCIDR(subnet)
+	ipRange.IP = ip
+	n := &Network{
+		Name:    name,
+		IpRange: ipRange,
+		Driver:  d.Name(),
+	}
+	err := d.initBridge(n)
+	if err != nil {
+		slog.Error("init bridge error", "err", err)
+	}
+	return n, err
+}
+
+func (d *BridgeNetworkDriver) Delete(network Network) error {
+	// 1.清除路由规则
+	err := deleteIPRoute(network.Name, network.IpRange.String())
+	if err != nil {
+		slog.Error("clean route rule error", "err", err)
+		return err
+	}
+	// 2.清除 iptables 规则
+	err = deleteIPTables(network.Name, network.IpRange)
+	if err != nil {
+		slog.Error("clean snat iptables rule error", "err", err)
+		return err
+	}
+	// 3.删除网桥
+	err = d.deleteBridge(&network)
+	if err != nil {
+		slog.Error("delete bridge error", "err", err)
+		return err
+	}
+	return nil
+}
+func (d *BridgeNetworkDriver) Connect(network *Network, endpoint *Endpoint) error {
+	return nil
+}
+func (d *BridgeNetworkDriver) Disconnect(network *Network, endpoint *Endpoint) error {
+	return nil
+}
 func (d *BridgeNetworkDriver) deleteBridge(n *Network) error {
 	bridgeName := n.Name
 
@@ -33,21 +75,6 @@ func (d *BridgeNetworkDriver) deleteBridge(n *Network) error {
 	}
 
 	return nil
-}
-
-func (d *BridgeNetworkDriver) Create(subnet string, name string) (*Network, error) {
-	ip, ipRange, _ := net.ParseCIDR(subnet)
-	ipRange.IP = ip
-	n := &Network{
-		Name:    name,
-		IpRange: ipRange,
-		Driver:  d.Name(),
-	}
-	err := d.initBridge(n)
-	if err != nil {
-		slog.Error("init bridge error", "err", err)
-	}
-	return n, err
 }
 
 func (d *BridgeNetworkDriver) initBridge(n *Network) error {
@@ -131,10 +158,57 @@ func setInterfaceUP(interfaceName string) error {
 	return nil
 }
 
+// 删除路由，ip addr del xxx命令
+func deleteIPRoute(name string, rawIP string) error {
+	retries := 2
+	var iface netlink.Link
+	var err error
+	for i := 0; i < retries; i++ {
+		// 通过LinkByName方法找到需要设置的网络接口
+		iface, err = netlink.LinkByName(name)
+		if err == nil {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
+	if err != nil {
+		return err
+	}
+	// 查询对应设备的路由并全部删除
+	list, err := netlink.RouteList(iface, netlink.FAMILY_V4)
+	if err != nil {
+		return err
+	}
+	for _, route := range list {
+		if route.Dst.String() == rawIP { // 根据子网进行匹配
+			err = netlink.RouteDel(&route)
+			if err != nil {
+				slog.Error("delete route error", "err", err)
+				continue
+			}
+		}
+	}
+	return nil
+}
+
 func setupIPTables(bridgeName string, subnet *net.IPNet) error {
-	iptablesCmd := fmt.Sprintf("-t nat -A POSTROUTING -s %s ! -o %s -j MASQUERADE", subnet.String(), bridgeName)
+	return configIPTables(bridgeName, subnet, false)
+}
+
+func deleteIPTables(bridgeName string, subnet *net.IPNet) error {
+	return configIPTables(bridgeName, subnet, true)
+}
+
+func configIPTables(bridgeName string, subnet *net.IPNet, isDelete bool) error {
+	action := "-A"
+	if isDelete {
+		action = "-D"
+	}
+	// 拼接命令
+	iptablesCmd := fmt.Sprintf("-t nat %s POSTROUTING -s %s ! -o %s -j MASQUERADE", action, subnet.String(), bridgeName)
 	cmd := exec.Command("iptables", strings.Split(iptablesCmd, " ")...)
-	//err := cmd.Run()
+	slog.Info("配置 SNAT", "cmd", cmd.String())
+	// 执行该命令
 	output, err := cmd.Output()
 	if err != nil {
 		slog.Error("iptables Output", "output", output)
