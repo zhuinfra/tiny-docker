@@ -51,6 +51,14 @@ var runCommand = &cli.Command{
 			Name:  "e",
 			Usage: "set environment variables",
 		},
+		&cli.StringFlag{
+			Name:  "network",
+			Usage: "Connect a container to a network",
+		},
+		&cli.StringSliceFlag{
+			Name:  "p",
+			Usage: "set port mapping,e.g. -p 8080:80 -p 30336:3306",
+		},
 	},
 	Action: func(ctx context.Context, cmd *cli.Command) error {
 		slog.Info("runCommand start")
@@ -75,7 +83,11 @@ var runCommand = &cli.Command{
 		volume := cmd.String("v")
 		containerName := cmd.String("name")
 		envSlice := cmd.StringSlice("e")
-		Run(tty, image, comArray, resConf, volume, containerName, envSlice)
+
+		network := cmd.String("network")
+		portMapping := cmd.StringSlice("p")
+
+		Run(tty, volume, network, containerName, image, comArray, envSlice, portMapping, resConf)
 		return nil
 	},
 }
@@ -197,12 +209,13 @@ var networkCommand = &cli.Command{
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:  "driver",
-					Usage: "network driver (bridge/overlay)",
+					Usage: "network driver",
 					Value: "bridge",
 				},
 				&cli.StringFlag{
-					Name:  "subnet",
-					Usage: "network subnet (e.g., 172.18.0.0/16)",
+					Name:     "subnet",
+					Usage:    "network subnet (e.g., 172.18.0.0/16)",
+					Required: true,
 				},
 			},
 			Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -211,7 +224,6 @@ var networkCommand = &cli.Command{
 				if args.Len() < 1 {
 					return fmt.Errorf("missing network name")
 				}
-				network.Init()
 				driver := cmd.String("driver")
 				subnet := cmd.String("subnet")
 				network.CreateNetwork(driver, subnet, args.Get(0))
@@ -242,7 +254,6 @@ var networkCommand = &cli.Command{
 				if args.Len() < 1 {
 					return fmt.Errorf("missing network name")
 				}
-				network.Init()
 				network.DeleteNetwork(args.Get(0))
 				return nil
 			},

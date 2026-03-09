@@ -33,7 +33,7 @@ func (d *BridgeNetworkDriver) Create(subnet string, name string) (*Network, erro
 	return n, err
 }
 
-func (d *BridgeNetworkDriver) Delete(network Network) error {
+func (d *BridgeNetworkDriver) Delete(network *Network) error {
 	// 1.清除路由规则
 	err := deleteIPRoute(network.Name, network.IpRange.String())
 	if err != nil {
@@ -47,17 +47,61 @@ func (d *BridgeNetworkDriver) Delete(network Network) error {
 		return err
 	}
 	// 3.删除网桥
-	err = d.deleteBridge(&network)
+	err = d.deleteBridge(network)
 	if err != nil {
 		slog.Error("delete bridge error", "err", err)
 		return err
 	}
 	return nil
 }
-func (d *BridgeNetworkDriver) Connect(network *Network, endpoint *Endpoint) error {
+
+// 配置veth-pair, 其中一端挂载到bridge
+func (d *BridgeNetworkDriver) Connect(networkName string, endpoint *Endpoint) error {
+	bridgeName := networkName
+	br, err := netlink.LinkByName(bridgeName)
+	if err != nil {
+		return err
+	}
+	la := netlink.NewLinkAttrs()
+	la.Name = endpoint.ID[:5]
+	la.MasterIndex = br.Attrs().Index
+	endpoint.Device = netlink.Veth{
+		LinkAttrs: la,
+		PeerName:  "cif-" + endpoint.ID[:5],
+	}
+	if err = netlink.LinkAdd(&endpoint.Device); err != nil {
+		return fmt.Errorf("error Add Endpoint Device: %v", err)
+	}
+	if err = netlink.LinkSetUp(&endpoint.Device); err != nil {
+		return fmt.Errorf("error Add Endpoint Device: %v", err)
+	}
 	return nil
 }
-func (d *BridgeNetworkDriver) Disconnect(network *Network, endpoint *Endpoint) error {
+
+func (d *BridgeNetworkDriver) Disconnect(endpointID string) error {
+	vethNme := endpointID[:5]
+	veth, err := netlink.LinkByName(vethNme)
+	if err != nil {
+		return err
+	}
+	err = netlink.LinkSetNoMaster(veth)
+	if err != nil {
+		return err
+	}
+	err = netlink.LinkDel(veth)
+	if err != nil {
+		return err
+	}
+	veth2Name := "cif-" + vethNme
+	veth2, err := netlink.LinkByName(veth2Name)
+	if err != nil {
+		return err
+	}
+	err = netlink.LinkDel(veth2)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 func (d *BridgeNetworkDriver) deleteBridge(n *Network) error {

@@ -16,19 +16,22 @@ var (
 	RUNNING             = "running"
 	STOP                = "stopped"
 	Exit                = "exited"
-	DefaultInfoLocation = "/var/run/tiny-docker/%s/"
+	DefaultInfoLocation = "/var/run/tiny-docker/containers/%s/"
 	ConfigName          = "config.json"
 	ContainerLogFile    = "container.log"
 )
 
 type ContainerInfo struct {
-	Pid         string `json:"pid"`        // 容器的init进程在宿主机上的 PID
-	Id          string `json:"id"`         // 容器Id
-	Name        string `json:"name"`       // 容器名
-	Command     string `json:"command"`    // 容器内init运行命令
-	CreatedTime string `json:"createTime"` // 创建时间
-	Status      string `json:"status"`     // 容器的状态
-	Volume      string `json:"volume"`
+	Pid         string   `json:"pid"`        // 容器的init进程在宿主机上的 PID
+	Id          string   `json:"id"`         // 容器Id
+	Name        string   `json:"name"`       // 容器名
+	Command     string   `json:"command"`    // 容器内init运行命令
+	CreatedTime string   `json:"createTime"` // 创建时间
+	Status      string   `json:"status"`     // 容器的状态
+	Volume      string   `json:"volume"`
+	NetworkName string   `json:"networkName"` // 容器所在的网络
+	PortMapping []string `json:"portmapping"` // 端口映射
+	IP          string   `json:"ip"`
 }
 
 func randStringBytes(n int) string {
@@ -46,7 +49,9 @@ func GenerateId() string {
 }
 
 // 记录容器信息
-func RecordContainerInfo(containerID string, containerPID int, commandArray []string, containerName string, volume string) (string, error) {
+func RecordContainerInfo(containerID, containerName, volume, networkName, ip string, containerPID int,
+	portMapping, commandArray []string) (string, error) {
+
 	createTime := time.Now().Format("2006-01-02 15:04:05")
 	command := strings.Join(commandArray, " ")
 	containInfo := ContainerInfo{
@@ -57,6 +62,9 @@ func RecordContainerInfo(containerID string, containerPID int, commandArray []st
 		CreatedTime: createTime,
 		Status:      RUNNING,
 		Volume:      volume,
+		NetworkName: networkName,
+		PortMapping: portMapping,
+		IP:          ip,
 	}
 
 	// 容器信息保存成json

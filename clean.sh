@@ -42,6 +42,6 @@ fi
 
 # 4. clean runtime state
 echo "clean runtime metadata"
-rm -rf /var/run/tiny-docker/*
+rm -rf /var/run/tiny-docker/containers/*
 
 echo "== tiny-docker cleanup done =="

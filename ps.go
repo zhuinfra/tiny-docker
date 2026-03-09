@@ -12,8 +12,7 @@ import (
 func ListContainers() {
 	dirURL := fmt.Sprintf(container.DefaultInfoLocation, "")
 	if _, err := os.Stat(dirURL); os.IsNotExist(err) {
-		slog.Warn("Container info directory not exist", "dir", dirURL)
-		return
+		os.MkdirAll(dirURL, 0622)
 	}
 	files, err := os.ReadDir(dirURL)
 	if err != nil {
