@@ -60,7 +60,8 @@ func Run(tty bool,
 
 	if tty {
 		parent.Wait()
-		// container.DeleteWorkSpace("containerID", volume)
+		container.DeleteContainerInfo(containerID)
+		container.DeleteWorkSpace(containerID, volume)
 	}
 
 }
