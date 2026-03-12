@@ -1,4 +1,4 @@
-package subsystems
+package cgroups
 
 import (
 	"bufio"

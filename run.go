@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"tiny-docker/cgroups"
-	"tiny-docker/cgroups/subsystems"
+	types "tiny-docker/cgroups/types"
 	"tiny-docker/container"
 	"tiny-docker/network"
 )
@@ -15,7 +15,7 @@ import (
 func Run(tty bool,
 	volume, net, containerName, image string,
 	comArray, envSlice, portMapping []string,
-	res *subsystems.ResourceConfig) {
+	res *cgroups.ResourceConfig) {
 
 	// 1.创建docker init 进程
 	containerID := container.GenerateId()
@@ -50,7 +50,7 @@ func Run(tty bool,
 	container.RecordContainerInfo(containerID, containerName, volume, net, containerIP, parent.Process.Pid, portMapping, comArray)
 
 	// 4.设置cgroup
-	cgroupsManager := cgroups.NewCgroupManager("tiny-docker-cgroup")
+	cgroupsManager := types.NewCgroupManager("tiny-docker-cgroup")
 	defer cgroupsManager.Destory()
 	cgroupsManager.Set(res)
 	cgroupsManager.Apply(parent.Process.Pid)

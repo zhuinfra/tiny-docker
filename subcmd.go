@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"tiny-docker/cgroups/subsystems"
+	"tiny-docker/cgroups"
 	"tiny-docker/container"
 	"tiny-docker/network"
 
@@ -75,7 +75,7 @@ var runCommand = &cli.Command{
 			return fmt.Errorf("it is invalid to use -it and -d together")
 		}
 
-		resConf := &subsystems.ResourceConfig{
+		resConf := &cgroups.ResourceConfig{
 			MemoryLimit: cmd.String("m"),
 			CpuSet:      cmd.String("cpus"),
 			CpuShare:    cmd.String("c"),

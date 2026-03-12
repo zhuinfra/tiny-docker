@@ -1,4 +1,4 @@
-package subsystems
+package cgroups
 
 // 资源限制配置
 type ResourceConfig struct {
@@ -15,11 +15,3 @@ type Subsystem interface {
 	Apply(cgroupPath string, pid int) error
 	Remove(cgroupPath string) error
 }
-
-var (
-	SubsystemsIns = []Subsystem{
-		&MemorySubSystem{},
-		&CpuSubSystem{},
-		&CpusetSubSystem{},
-	}
-)
