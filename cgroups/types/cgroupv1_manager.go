@@ -30,7 +30,7 @@ func (c *CgroupManagerV1) Set(res *cgroups.ResourceConfig) error {
 	return nil
 }
 
-func (c *CgroupManagerV1) Destory() error {
+func (c *CgroupManagerV1) Destroy() error {
 	for _, subSysIns := range v1.SubsystemsIns {
 		subSysIns.Remove(c.Path)
 	}

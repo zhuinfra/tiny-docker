@@ -51,7 +51,7 @@ func Run(tty bool,
 
 	// 4.设置cgroup
 	cgroupsManager := types.NewCgroupManager(containerID)
-	defer cgroupsManager.Destory()
+	defer cgroupsManager.Destroy()
 	cgroupsManager.Set(res)
 	cgroupsManager.Apply(parent.Process.Pid)
 
