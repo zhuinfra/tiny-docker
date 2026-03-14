@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"tiny-docker/cgroups"
@@ -10,18 +11,8 @@ import (
 type MemorySubSystem struct {
 }
 
-func (s *MemorySubSystem) Set(cgroupPath string, res *cgroups.ResourceConfig) error {
-	if subsysCgroupPath, err := cgroups.GetCgroupPath(s.Name(), cgroupPath, true); err == nil {
-		if err := os.WriteFile(subsysCgroupPath+"/memory.limit_in_bytes", []byte(res.MemoryLimit), 0644); err != nil {
-			return fmt.Errorf("set cgroup memory fail %v", err)
-		}
-		return nil
-	} else {
-		return err
-	}
-}
 func (s *MemorySubSystem) Apply(cgroupPath string, pid int) error {
-	if subsysCgroupPath, err := cgroups.GetCgroupPath(s.Name(), cgroupPath, false); err == nil {
+	if subsysCgroupPath, err := GetCgroupPath(s.Name(), cgroupPath, false); err == nil {
 		if err := os.WriteFile(subsysCgroupPath+"/tasks", []byte(fmt.Sprintf("%d", pid)), 0644); err != nil {
 			return fmt.Errorf("set cgroup proc fail %v", err)
 		}
@@ -30,8 +21,20 @@ func (s *MemorySubSystem) Apply(cgroupPath string, pid int) error {
 		return err
 	}
 }
+func (s *MemorySubSystem) Set(cgroupPath string, res *cgroups.ResourceConfig) error {
+	if subsysCgroupPath, err := GetCgroupPath(s.Name(), cgroupPath, true); err == nil {
+		if err := os.WriteFile(subsysCgroupPath+"/memory.limit_in_bytes", []byte(res.MemoryLimit), 0644); err != nil {
+			slog.Error("cgroups set memory fail", "err", err)
+			return err
+		}
+		return nil
+	} else {
+		return err
+	}
+}
+
 func (s *MemorySubSystem) Remove(cgroupPath string) error {
-	if subsysCgroupPath, err := cgroups.GetCgroupPath(s.Name(), cgroupPath, false); err == nil {
+	if subsysCgroupPath, err := GetCgroupPath(s.Name(), cgroupPath, false); err == nil {
 		return os.RemoveAll(subsysCgroupPath)
 	} else {
 		return err

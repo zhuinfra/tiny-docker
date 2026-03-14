@@ -30,14 +30,17 @@ var runCommand = &cli.Command{
 			Aliases: []string{"memory"},
 			Usage:   "memory limit",
 		},
-		&cli.IntFlag{
-			Name:    "c",
-			Aliases: []string{"cpu-shares"},
-			Usage:   "CPU shares (relative weight)",
+		&cli.StringFlag{
+			Name:  "cpu-shares",
+			Usage: "CPU shares (relative weight)",
 		},
 		&cli.FloatFlag{
 			Name:  "cpus",
 			Usage: "Number of CPUs",
+		},
+		&cli.StringFlag{
+			Name:  "cpuset-cpus",
+			Usage: "CPUs in which to allow execution (0-3, 0,1)",
 		},
 		&cli.StringFlag{
 			Name:  "v",
@@ -77,8 +80,9 @@ var runCommand = &cli.Command{
 
 		resConf := &cgroups.ResourceConfig{
 			MemoryLimit: cmd.String("m"),
-			CpuSet:      cmd.String("cpus"),
-			CpuShare:    cmd.String("c"),
+			CpuShare:    cmd.String("cpu-shares"),
+			Cpus:        cmd.Float32("cpus"),
+			CpuSet:      cmd.String("cpuset-cpus"),
 		}
 		volume := cmd.String("v")
 		containerName := cmd.String("name")

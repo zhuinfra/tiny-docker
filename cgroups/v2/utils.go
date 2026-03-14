@@ -1,8 +1,8 @@
-package cgroups
+package v2
 
 import (
 	"bufio"
-	"fmt"
+	"log/slog"
 	"os"
 	"path"
 	"strings"
@@ -38,11 +38,12 @@ func GetCgroupPath(subsystem string, cgroupPath string, autoCreate bool) (string
 	// 1.状态正常，返回完整路径 2.状态异常，创建为true则创建 3.状态异常，创建为false则返回错误
 	if _, err := os.Stat(path.Join(cgroupRoot, cgroupPath)); err != nil {
 		if os.IsNotExist(err) && autoCreate {
-			if err := os.Mkdir(path.Join(cgroupRoot, cgroupPath), 0755); err != nil {
-				return "", fmt.Errorf("error create cgroup %v", err)
+			if err := os.MkdirAll(path.Join(cgroupRoot, cgroupPath), 0755); err != nil {
+				slog.Error("os.Mkdir error", "error", err)
+				return "", err
 			}
 		} else {
-			return "", fmt.Errorf("cgroup path error %v", err)
+			return "", err
 		}
 	}
 	return path.Join(cgroupRoot, cgroupPath), nil

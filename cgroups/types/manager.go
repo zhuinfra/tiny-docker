@@ -1,9 +1,11 @@
-package v1
+package types
 
 import (
+	"path"
 	cgroups "tiny-docker/cgroups"
 )
 
-func NewCgroupManager(path string) cgroups.CgroupManager {
-	return &CgroupManagerV1{}
+func NewCgroupManager(containerID string) cgroups.CgroupManager {
+	path := path.Join(cgroups.CgroupDir, containerID)
+	return &CgroupManagerV1{Path: path}
 }

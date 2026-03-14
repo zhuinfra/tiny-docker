@@ -1,4 +1,4 @@
-package cgroups
+package v1
 
 import (
 	"testing"

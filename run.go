@@ -50,7 +50,7 @@ func Run(tty bool,
 	container.RecordContainerInfo(containerID, containerName, volume, net, containerIP, parent.Process.Pid, portMapping, comArray)
 
 	// 4.设置cgroup
-	cgroupsManager := types.NewCgroupManager("tiny-docker-cgroup")
+	cgroupsManager := types.NewCgroupManager(containerID)
 	defer cgroupsManager.Destory()
 	cgroupsManager.Set(res)
 	cgroupsManager.Apply(parent.Process.Pid)

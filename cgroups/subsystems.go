@@ -4,6 +4,7 @@ package cgroups
 type ResourceConfig struct {
 	MemoryLimit string
 	CpuShare    string
+	Cpus        float32
 	CpuSet      string
 }
 
@@ -15,3 +16,5 @@ type Subsystem interface {
 	Apply(cgroupPath string, pid int) error
 	Remove(cgroupPath string) error
 }
+
+var CgroupDir = "tiny-docker"
