@@ -8,6 +8,7 @@ import (
 	"tiny-docker/cgroups"
 )
 
+// 内存控制器
 type MemorySubSystem struct {
 }
 

@@ -9,6 +9,7 @@ import (
 	"tiny-docker/cgroups"
 )
 
+// cpuset控制器
 type CpusetSubSystem struct {
 }
 

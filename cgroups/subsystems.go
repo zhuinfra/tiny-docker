@@ -4,12 +4,12 @@ package cgroups
 type ResourceConfig struct {
 	MemoryLimit string
 	CpuShare    string
-	Cpus        float32
+	Cpus        float64
 	CpuSet      string
 }
 
 // Subsystem接口, 每个subsystem实现该接口
-// cgroup的增删, 限制配置
+// 根据ResourceConfig在每一种subsystem中设置资源限制
 type Subsystem interface {
 	Name() string
 	Set(cgroupPath string, res *ResourceConfig) error

@@ -81,7 +81,7 @@ var runCommand = &cli.Command{
 		resConf := &cgroups.ResourceConfig{
 			MemoryLimit: cmd.String("m"),
 			CpuShare:    cmd.String("cpu-shares"),
-			Cpus:        cmd.Float32("cpus"),
+			Cpus:        cmd.Float64("cpus"),
 			CpuSet:      cmd.String("cpuset-cpus"),
 		}
 		volume := cmd.String("v")
